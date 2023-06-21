@@ -801,7 +801,7 @@ impl<P: JsonRpcClient> BuilderClient<P> {
         let geth_traces = self.cli.trace_block_by_number(block_num.into()).await?;
 
         // fetch up to 256 blocks
-        let mut n_blocks = 0; // std::cmp::min(256, block_num as usize);
+        let mut n_blocks = std::cmp::min(256, block_num as usize); // std::cmp::min(256, block_num as usize);
         let mut next_hash = eth_block.parent_hash;
         let mut prev_state_root: Option<Word> = None;
         let mut history_hashes = vec![Word::default(); n_blocks];
