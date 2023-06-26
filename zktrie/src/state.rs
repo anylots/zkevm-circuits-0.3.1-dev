@@ -11,6 +11,7 @@ pub mod builder;
 pub mod witness;
 
 use std::{cell::RefCell, fmt, rc::Rc};
+use std::sync::{Arc};
 
 /// turn a integer (expressed by field) into MPTProofType
 pub fn as_proof_type(v: i32) -> MPTProofType {
@@ -31,7 +32,7 @@ pub fn as_proof_type(v: i32) -> MPTProofType {
 #[derive(Clone, Default)]
 pub struct ZktrieState {
     sdb: StateDB,
-    zk_db: Rc<RefCell<ZkMemoryDb>>,
+    zk_db: Arc<RefCell<ZkMemoryDb>>,
     trie_root: ZkTrieHash,
     accounts: HashMap<Address, ZkTrieHash>,
 }
@@ -85,7 +86,7 @@ impl ZktrieState {
 
         Self {
             sdb,
-            zk_db: Rc::new(RefCell::new(zk_db)),
+            zk_db: Arc::new(RefCell::new(zk_db)),
             trie_root: state_root.0,
             accounts,
         }

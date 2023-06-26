@@ -756,6 +756,9 @@ pub fn build_state_code_db(
         for storage_proof in proof.storage_proof {
             storage.insert(storage_proof.key, storage_proof.value);
         }
+        println!("==================>build_state_code_db:");
+        println!("{:?}",&proof.address);
+        println!("{:?}",proof.keccak_code_hash);
         sdb.set_account(
             &proof.address,
             state_db::Account {
@@ -767,6 +770,7 @@ pub fn build_state_code_db(
                 code_size: proof.code_size,
             },
         )
+        
     }
 
     let mut code_db = CodeDB::new();
@@ -801,11 +805,12 @@ impl<P: JsonRpcClient> BuilderClient<P> {
         let geth_traces = self.cli.trace_block_by_number(block_num.into()).await?;
 
         // fetch up to 256 blocks
-        let mut n_blocks = std::cmp::min(256, block_num as usize); // std::cmp::min(256, block_num as usize);
+        let mut n_blocks = 1;// std::cmp::min(256, block_num as usize); // std::cmp::min(256, block_num as usize);
         let mut next_hash = eth_block.parent_hash;
         let mut prev_state_root: Option<Word> = None;
         let mut history_hashes = vec![Word::default(); n_blocks];
         while n_blocks > 0 {
+            println!("=======================fetch prev block");
             n_blocks -= 1;
 
             // TODO: consider replacing it with `eth_getHeaderByHash`, it's faster
@@ -876,6 +881,7 @@ impl<P: JsonRpcClient> BuilderClient<P> {
                 .unwrap();
             codes.insert(address, code);
         }
+        println!("{:?}",codes);
         Ok((proofs, codes))
     }
 
@@ -901,7 +907,7 @@ impl<P: JsonRpcClient> BuilderClient<P> {
         let block = BlockHead::new(self.chain_id, history_hashes, eth_block)?;
         let mut builder =
             CircuitInputBuilder::new_from_headers(self.circuits_params, sdb, code_db, &[block]);
-
+        builder.block.prev_state_root=_prev_state_root;
         builder.handle_block(eth_block, geth_traces)?;
         Ok(builder)
     }
